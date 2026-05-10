@@ -30,7 +30,7 @@ spec:
       project: roboshop
       component: user
       tier: backend
-  # This is pod definition, pod is subset of replicaset
+  # This is pod definition, pod is subset of replicaset, these are assigned to newly created pods
   template:
     metadata:
       labels:
@@ -39,4 +39,51 @@ spec:
         tier: backend
     spec:
       containers:
-        - name: 
+        - name: user
+          image: adepusaikumar/user:1.0.0
+          envFrom:
+            - configMapRef:
+                name: user
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "150m"
+              memory: "256Mi"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            failureThreshold: 2
+            periodSeconds: 15
+          readinessProbe:
+            tcpSocket:
+              port: 8080
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            periodSeconds: 5
+            failureThreshold: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user
+  namespace: roboshop
+  labels:
+    project: roboshop
+    component: user
+    environment: dev
+    tier: backend
+spec:
+  selector:
+    project: roboshop
+    component: user
+    tier: backend
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
