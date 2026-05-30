@@ -23,7 +23,7 @@ metadata:
     component: cart
     environment: dev
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     # Lables for replicaset to match the pods
     matchLabels:
